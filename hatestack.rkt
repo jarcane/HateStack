@@ -116,18 +116,18 @@
                           (div ((class "container")) ,(render-jumbotron))
                           ,(render-posts HATE)))))))
 
-(define (show-page req)
+(define (show-page req [err #f])
   (let ((bindings (request-bindings req)))
     (if (for/and ((i '(title name post)))
           (exists-binding? i bindings))
         (if (string=? (extract-binding/single 'post bindings) "")
-            (render-page "Post body cannot be empty")
+            (show-page (redirect/get) "Post body cannot be empty")
             (begin 
               (add-post (extract-binding/single 'title bindings)
                         (extract-binding/single 'name bindings)
                         (extract-binding/single 'post bindings))
-              (render-page)))
-        (render-page))))
+              (show-page (redirect/get))))
+        (render-page err))))
 
 (define (start req)
   (show-page req))
