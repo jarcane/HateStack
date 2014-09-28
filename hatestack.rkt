@@ -38,6 +38,16 @@
                                      (current-seconds))
                                (stack-posts HATE))))
 
+(define (render-error err)
+  (if err 
+      `(div ((class "alert alert-dismissable alert-danger"))
+            (button ((type "button") 
+                     (class "close")
+                     (data-dismiss "alert")))
+            (strong "Hey! Listen! ")
+            ,err)
+      ""))
+
 (define (render-post p)
   `(div ((class "panel panel-default"))
         (div ((class "panel-heading")) (h4 ,(post-title p)))
@@ -89,7 +99,8 @@
                          (button ((type "submit") (class "btn btn-primary")) "Submit")
                          (button ((type "reset") (class "btn btn-default")) "Cancel"))))))))
 
-(define (render-page)
+(define (render-page [err #f])
+  (print err)
   (response/xexpr
    #:preamble #"<!DOCTYPE html>"
    `(html (head (title ,NAME)
@@ -100,18 +111,23 @@
                 (script ((src "//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"))))
           (body (div ((class "col-lg-10"))
                      ,(render-bar)
+                     ,(render-error err)
                      (div ((class "col-lg 8"))
                           (div ((class "container")) ,(render-jumbotron))
                           ,(render-posts HATE)))))))
 
 (define (start req)
   (let ((bindings (request-bindings req)))
-    (when (for/and ((i '(title name post)))
-            (exists-binding? i bindings))
-      (add-post (extract-binding/single 'title bindings)
-                (extract-binding/single 'name bindings)
-                (extract-binding/single 'post bindings)))
-    (render-page)))
+    (if (for/and ((i '(title name post)))
+          (exists-binding? i bindings))
+        (if (string=? (extract-binding/single 'post bindings) "")
+            (render-page "Post body cannot be empty")
+            (begin 
+              (add-post (extract-binding/single 'title bindings)
+                        (extract-binding/single 'name bindings)
+                        (extract-binding/single 'post bindings))
+              (render-page)))
+        (render-page))))
 
 ;; Main Server startup
 (serve/servlet start
