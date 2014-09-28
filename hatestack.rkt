@@ -10,9 +10,10 @@
 (define DEFAULT-TITLE "Frothing Hatred")
 (define DEFAULT-AUTHOR "Angry Loudmouth")
 (define MAX-POSTS 20)
-(define MAX-LENGTH 500)
+(define MAX-LENGTH 1500)
 (define ABOUT (string-append NAME " is a temporary bin for angry rants." 
-                             " All posts are deleted after 30 minutes. "))
+                             " All posts are stored only in memory " 
+                             " and deleted after 30 minutes. "))
 (define GH-URL "https://github.com/jarcane/HateStack")
 (define GLYPH "glyphicon glyphicon-fire")
 
