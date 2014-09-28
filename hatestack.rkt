@@ -169,4 +169,5 @@
 (serve/servlet start
                #:servlet-regexp #rx""
                #:servlet-path "/"
-               #:port 8080)
+               #:port 8080
+               #:launch-browser? #f)
