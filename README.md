@@ -9,6 +9,6 @@ HateStack is a public forum for angry rants you don't wish anyone to remember in
 
 ## Credits
 
-Coded by John Berry
+Copyright 2014 by John Berry
 
 Inspired by [this tweet](https://twitter.com/TheQuinnspiracy/status/515709684851175424) by Zoe Quinn.
