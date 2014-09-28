@@ -1,7 +1,8 @@
 #lang racket
 (require web-server/servlet
          web-server/servlet-env
-         web-server/http)
+         web-server/http
+         web-server/page)
 
 ;; Constants
 (define POST-DEATH 1800)
@@ -100,7 +101,6 @@
                          (button ((type "reset") (class "btn btn-default")) "Cancel"))))))))
 
 (define (render-page [err #f])
-  (print err)
   (response/xexpr
    #:preamble #"<!DOCTYPE html>"
    `(html (head (title ,NAME)
@@ -116,7 +116,7 @@
                           (div ((class "container")) ,(render-jumbotron))
                           ,(render-posts HATE)))))))
 
-(define (start req)
+(define (show-page req)
   (let ((bindings (request-bindings req)))
     (if (for/and ((i '(title name post)))
           (exists-binding? i bindings))
@@ -128,6 +128,9 @@
                         (extract-binding/single 'post bindings))
               (render-page)))
         (render-page))))
+
+(define (start req)
+  (show-page req))
 
 ;; Main Server startup
 (serve/servlet start
