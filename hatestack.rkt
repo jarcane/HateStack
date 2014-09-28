@@ -117,7 +117,8 @@
                           ,(render-posts HATE)))))))
 
 (define (show-page req [err #f])
-  (let ((bindings (request-bindings req)))
+  (let ((bindings (request-bindings req))
+        (responder (lambda () (render-page err))))
     (if (for/and ((i '(title name post)))
           (exists-binding? i bindings))
         (if (string=? (extract-binding/single 'post bindings) "")
@@ -127,7 +128,7 @@
                         (extract-binding/single 'name bindings)
                         (extract-binding/single 'post bindings))
               (show-page (redirect/get))))
-        (render-page err))))
+        (send/back (responder)))))
 
 (define (start req)
   (show-page req))
