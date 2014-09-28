@@ -10,6 +10,7 @@
 (define DEFAULT-TITLE "Frothing Hatred")
 (define DEFAULT-AUTHOR "Angry Loudmouth")
 (define MAX-POSTS 20)
+(define MAX-LENGTH 500)
 
 ;; Structs
 ; The stack is a list of posts
@@ -105,7 +106,13 @@
                (div ((class "form-group"))
                     (label ((for "Post") (class "col-lg-2 control-label")) "Your Rant")
                     (div ((class "col-lg-10"))
-                         (textarea ((class "form-control") (rows "5") (name "Post"))))))
+                         (textarea ((class "form-control")
+                                    (rows "5") 
+                                    (name "Post")
+                                    (placeholder 
+                                     ,(string-append "Your rant may not exceed " 
+                                                     (number->string MAX-LENGTH)
+                                                     " characters.")))))))
           (div ((class "row"))
                (div ((class "col-lg-10 col-lg-offset-2"))
                     (div ((class "form-group"))
@@ -135,13 +142,15 @@
         (responder (lambda () (render-page err))))
     (if (for/and ((i '(title name post)))
           (exists-binding? i bindings))
-        (if (string=? (extract-binding/single 'post bindings) "")
-            (show-page (redirect/get) "Post body cannot be empty")
-            (begin 
-              (add-post (extract-binding/single 'title bindings)
-                        (extract-binding/single 'name bindings)
-                        (extract-binding/single 'post bindings))
-              (show-page (redirect/get))))
+        (cond ((string=? (extract-binding/single 'post bindings) "")
+               (show-page (redirect/get) "Post body cannot be empty"))
+              ((> (string-length (extract-binding/single 'post bindings)) MAX-LENGTH)
+               (show-page (redirect/get) "Post exceeded maximum length"))
+              (else (begin 
+                      (add-post (extract-binding/single 'title bindings)
+                                (extract-binding/single 'name bindings)
+                                (extract-binding/single 'post bindings))
+                      (show-page (redirect/get)))))
         (send/back (responder)))))
 
 ; Initial request reciever
