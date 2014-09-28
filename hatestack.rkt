@@ -12,26 +12,32 @@
 (define MAX-POSTS 20)
 
 ;; Structs
+; The stack is a list of posts
 (struct stack (posts) #:mutable)
 
+; Each post has a title, author, body text, and the current time in seconds (created)
 (struct post (title author body created) #:mutable)
 
 ;; Establish the HATE
+; this is the initial stack state.
 (define HATE (stack (list (post (string-append "Welcome to " NAME)
                                 DEFAULT-AUTHOR
                                 "This is a place for rants. All is forgotten."
                                 (current-seconds)))))
 
 ;; Functions
+; checks if the current time is past the expiration date of the post
 (define (old-post? p)
   (> (current-seconds) (+ (post-created p) POST-DEATH)))
 
+; Looks over the stack, removing old posts and dropping any over the maximum
 (define (check-posts s)
   (set-stack-posts! HATE (for/list ((i (stack-posts s))
                                     (j (in-range MAX-POSTS))
                                     #:unless (old-post? i))
                            i)))
 
+; adds a post to the stack given title, name, and body
 (define (add-post title name body)
   (set-stack-posts! HATE (cons (post (if (string=? title "") DEFAULT-TITLE title)
                                      (if (string=? name "") DEFAULT-AUTHOR name)
@@ -39,6 +45,7 @@
                                      (current-seconds))
                                (stack-posts HATE))))
 
+; Renders an error bar at the top of the page with the given message, unless no error is present
 (define (render-error err)
   (if err 
       `(div ((class "alert alert-dismissable alert-danger"))
@@ -49,17 +56,21 @@
             ,err)
       ""))
 
+; renders a post. Posts are rendered as Bootstrap panels with title, body, and author
 (define (render-post p)
   `(div ((class "panel panel-default"))
         (div ((class "panel-heading")) (h4 ,(post-title p)))
         (div ((class "panel-body")) (p ,(post-body p)))
         (div ((class "panel-footer")) (em ,(post-author p)))))
 
+; Creates a template for a container containing all of the current stack posts,
+; after clearing old or excess posts
 (define (render-posts s)
   (check-posts HATE)
   `(div ((class "container"))
         ,@(map render-post (stack-posts s))))
 
+; Template for the navbar at the top of the page
 (define (render-bar)
   `(nav ((class "navbar navbar-default")
          (role "navigation"))
@@ -69,6 +80,7 @@
                       (href "#"))
                      ,NAME)))))
 
+; Template for the entry box, rendered as a Bootstrap jumbotron
 (define (render-jumbotron)
   `(div ((class "jumbotron"))
         (fieldset 
@@ -100,6 +112,7 @@
                          (button ((type "submit") (class "btn btn-primary")) "Submit")
                          (button ((type "reset") (class "btn btn-default")) "Cancel"))))))))
 
+; Generates a response containing the main page
 (define (render-page [err #f])
   (response/xexpr
    #:preamble #"<!DOCTYPE html>"
@@ -116,6 +129,7 @@
                           (div ((class "container")) ,(render-jumbotron))
                           ,(render-posts HATE)))))))
 
+; The main request handler, parsing out posts as needed or calling the response generator
 (define (show-page req [err #f])
   (let ((bindings (request-bindings req))
         (responder (lambda () (render-page err))))
@@ -130,6 +144,7 @@
               (show-page (redirect/get))))
         (send/back (responder)))))
 
+; Initial request reciever
 (define (start req)
   (show-page req))
 
