@@ -1,8 +1,7 @@
 #lang racket
 (require web-server/servlet
          web-server/servlet-env
-         web-server/http
-         web-server/page)
+         web-server/http)
 
 ;; Constants
 (define POST-DEATH 1800)
