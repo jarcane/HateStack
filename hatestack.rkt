@@ -11,6 +11,10 @@
 (define DEFAULT-AUTHOR "Angry Loudmouth")
 (define MAX-POSTS 20)
 (define MAX-LENGTH 500)
+(define ABOUT (string-append NAME " is a temporary bin for angry rants." 
+                             " All posts are deleted after 30 minutes. "))
+(define GH-URL "https://github.com/jarcane/HateStack")
+(define GLYPH "glyphicon glyphicon-fire")
 
 ;; Structs
 ; The stack is a list of posts
@@ -79,7 +83,7 @@
              (div ((class "navbar-header"))
                   (a ((class "navbar-brand")
                       (href "#"))
-                     ,NAME)))))
+                     (span ((class ,GLYPH))) ,NAME)))))
 
 ; Template for the entry box, rendered as a Bootstrap jumbotron
 (define (render-jumbotron)
@@ -134,7 +138,10 @@
                      ,(render-error err)
                      (div ((class "col-lg 8"))
                           (div ((class "container")) ,(render-jumbotron))
-                          ,(render-posts HATE)))))))
+                          ,(render-posts HATE))))
+          (footer (div ((class "container well well-sm")) 
+                          (p ((class "text-center"))
+                             ,ABOUT (a ((href ,GH-URL)) "Source on Github.")))))))
 
 ; The main request handler, parsing out posts as needed or calling the response generator
 (define (show-page req [err #f])
