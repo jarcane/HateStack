@@ -5,15 +5,15 @@
 
 ;; Constants
 (define POST-DEATH 1800)
-(define NAME "HateStack")
-(define DEFAULT-TITLE "Frothing Hatred")
+(define NAME "RantStack")
+(define DEFAULT-TITLE "Frothing Rage")
 (define DEFAULT-AUTHOR "Angry Loudmouth")
 (define MAX-POSTS 20)
 (define MAX-LENGTH 1500)
 (define ABOUT (string-append NAME " is a temporary bin for angry rants." 
                              " All posts are stored only in memory " 
                              " and deleted after 30 minutes. "))
-(define GH-URL "https://github.com/jarcane/HateStack")
+(define GH-URL "https://github.com/jarcane/RantStack")
 (define GLYPH "glyphicon glyphicon-fire")
 
 ;; Structs
@@ -25,7 +25,7 @@
 
 ;; Establish the HATE
 ; this is the initial stack state.
-(define HATE (stack (list (post (string-append "Welcome to " NAME)
+(define RANTS (stack (list (post (string-append "Welcome to " NAME)
                                 DEFAULT-AUTHOR
                                 "This is a place for rants. All is forgotten."
                                 (current-seconds)))))
@@ -37,18 +37,18 @@
 
 ; Looks over the stack, removing old posts and dropping any over the maximum
 (define (check-posts s)
-  (set-stack-posts! HATE (for/list ((i (stack-posts s))
+  (set-stack-posts! RANTS (for/list ((i (stack-posts s))
                                     (j (in-range MAX-POSTS))
                                     #:unless (old-post? i))
                            i)))
 
 ; adds a post to the stack given title, name, and body
 (define (add-post title name body)
-  (set-stack-posts! HATE (cons (post (if (string=? title "") DEFAULT-TITLE title)
+  (set-stack-posts! RANTS (cons (post (if (string=? title "") DEFAULT-TITLE title)
                                      (if (string=? name "") DEFAULT-AUTHOR name)
                                      body
                                      (current-seconds))
-                               (stack-posts HATE))))
+                               (stack-posts RANTS))))
 
 ; Renders an error bar at the top of the page with the given message, unless no error is present
 (define (render-error err)
@@ -71,7 +71,7 @@
 ; Creates a template for a container containing all of the current stack posts,
 ; after clearing old or excess posts
 (define (render-posts s)
-  (check-posts HATE)
+  (check-posts RANTS)
   `(div ((class "container"))
         ,@(map render-post (stack-posts s))))
 
@@ -138,7 +138,7 @@
                      ,(render-error err)
                      (div ((class "col-lg 8"))
                           (div ((class "container")) ,(render-jumbotron))
-                          ,(render-posts HATE))))
+                          ,(render-posts RANTS))))
           (footer (div ((class "container well well-sm")) 
                           (p ((class "text-center"))
                              ,ABOUT (a ((href ,GH-URL)) "Source on Github.")))))))
